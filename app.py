@@ -62,7 +62,7 @@ def calculate_epf_projection(
     interest_rate
 ):
 
-    years = retirement_age - current_age
+    years = retirement_age - current_age + 1
 
     balance = current_balance
     salary = monthly_salary
