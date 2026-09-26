@@ -1,0 +1,1516 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>EPF Future Fund | AAFM India</title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='style.css') }}"
+    >
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+
+<div class="site-shell">
+
+    <!-- NAVIGATION -->
+
+    <nav class="nav">
+
+        <div class="brand">
+
+            <div class="brand-mark">
+                A
+            </div>
+
+            <div class="brand-text">
+                <strong>AAFM INDIA</strong>
+                <span>RETIREMENT LAB</span>
+            </div>
+
+        </div>
+
+        <div class="nav-status">
+            <span class="live-dot"></span>
+            EPF FUTURE FUND
+        </div>
+
+        <div class="nav-code">
+            SIM / 01
+        </div>
+
+    </nav>
+
+
+    <!-- HERO -->
+
+    <section class="hero">
+
+        <div class="hero-copy">
+
+            <div class="micro-label">
+                <span>EMPLOYEE PROVIDENT FUND</span>
+                <span>/</span>
+                <span>RETIREMENT SIMULATOR</span>
+            </div>
+
+            <h1>
+                YOUR SALARY
+                <span>ENDS.</span>
+                YOUR CORPUS
+                <span class="lime-text">SHOULDN'T.</span>
+            </h1>
+
+            <p>
+                See how contributions, salary growth
+                and compounding could transform today's
+                EPF into tomorrow's retirement corpus.
+            </p>
+
+            <a href="#calculator" class="hero-action">
+                <span>START SIMULATION</span>
+                <strong>↓</strong>
+            </a>
+
+        </div>
+
+
+        <div class="future-visual">
+
+            <div class="future-label">
+                FUTURE / FUND
+            </div>
+
+            <div class="future-circle">
+
+                <div class="circle-orbit orbit-a"></div>
+                <div class="circle-orbit orbit-b"></div>
+
+                <div class="future-core">
+                    <span>TARGET</span>
+                    <strong>60</strong>
+                    <small>RETIREMENT AGE</small>
+                </div>
+
+                <div class="floating-node node-one">
+                    <span>EPF</span>
+                    <strong>12%</strong>
+                </div>
+
+                <div class="floating-node node-two">
+                    <span>GROWTH</span>
+                    <strong>+8%</strong>
+                </div>
+
+                <div class="floating-node node-three">
+                    <span>INT.</span>
+                    <strong>8.25%</strong>
+                </div>
+
+            </div>
+
+            <div class="future-caption">
+
+                <span>NOW</span>
+
+                <div class="future-line">
+                    <span></span>
+                </div>
+
+                <span>RETIREMENT</span>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- CALCULATOR -->
+
+    <section class="calculator" id="calculator">
+
+        <div class="section-intro">
+
+            <div>
+
+                <span class="section-index">
+                    01 / INPUT
+                </span>
+
+                <h2>
+                    Set your
+                    <span>timeline.</span>
+                </h2>
+
+            </div>
+
+            <p>
+                Tell the simulator where you are today,
+                where you want to finish, and how your
+                EPF contributions are structured.
+            </p>
+
+        </div>
+
+
+        {% if error %}
+
+        <div class="error-box">
+
+            <span>
+                CALCULATION ERROR
+            </span>
+
+            <strong>
+                {{ error }}
+            </strong>
+
+        </div>
+
+        {% endif %}
+
+
+        <form method="POST">
+
+
+            <!-- AGE TIMELINE -->
+
+            <div class="timeline-panel">
+
+                <div class="panel-top">
+
+                    <div>
+
+                        <span class="panel-code">
+                            JOURNEY / 01
+                        </span>
+
+                        <h3>
+                            Your working horizon
+                        </h3>
+
+                    </div>
+
+                    <span class="panel-hint">
+                        AGE → RETIREMENT
+                    </span>
+
+                </div>
+
+
+                <div class="age-grid">
+
+                    <div class="age-control">
+
+                        <span class="control-label">
+                            YOU ARE HERE
+                        </span>
+
+                        <div class="age-input">
+
+                            <input
+                                type="number"
+                                name="current_age"
+                                min="18"
+                                placeholder="30"
+                                required
+                            >
+
+                            <span>
+                                YEARS
+                            </span>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="journey-line">
+
+                        <div class="journey-start"></div>
+
+                        <div class="journey-track">
+
+                            <span class="track-marker marker-one">
+                                40
+                            </span>
+
+                            <span class="track-marker marker-two">
+                                50
+                            </span>
+
+                            <span class="track-marker marker-three">
+                                55
+                            </span>
+
+                        </div>
+
+                        <div class="journey-end"></div>
+
+                    </div>
+
+
+                    <div class="age-control right">
+
+                        <span class="control-label">
+                            YOUR FINISH LINE
+                        </span>
+
+                        <div class="age-input">
+
+                            <input
+                                type="number"
+                                name="retirement_age"
+                                min="19"
+                                placeholder="60"
+                                required
+                            >
+
+                            <span>
+                                YEARS
+                            </span>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- MONEY INPUTS -->
+
+            <div class="money-grid">
+
+                <div class="mega-input salary-card">
+
+                    <div class="mega-number">
+                        01
+                    </div>
+
+                    <span class="control-label">
+                        MONTHLY BASIC SALARY + DA
+                    </span>
+
+                    <h3>
+                        What are you
+                        earning today?
+                    </h3>
+
+                    <div class="large-money-input">
+
+                        <span>₹</span>
+
+                        <input
+                            type="number"
+                            name="monthly_salary"
+                            min="1"
+                            placeholder="50,000"
+                            required
+                        >
+
+                    </div>
+
+                    <small>
+                        Monthly salary used as the contribution base
+                    </small>
+
+                </div>
+
+
+                <div class="mega-input balance-card">
+
+                    <div class="mega-number">
+                        02
+                    </div>
+
+                    <span class="control-label">
+                        CURRENT EPF BALANCE
+                    </span>
+
+                    <h3>
+                        What have you
+                        built already?
+                    </h3>
+
+                    <div class="large-money-input">
+
+                        <span>₹</span>
+
+                        <input
+                            type="number"
+                            name="current_balance"
+                            min="0"
+                            placeholder="4,50,000"
+                        >
+
+                    </div>
+
+                    <small>
+                        Leave blank if you do not have an existing EPF balance
+                    </small>
+
+                </div>
+
+            </div>
+
+
+            <!-- CONTROL DECK -->
+
+            <div class="control-deck">
+
+                <div class="deck-header">
+
+                    <div>
+
+                        <span class="panel-code">
+                            CONTROL DECK / 02
+                        </span>
+
+                        <h3>
+                            Tune your assumptions
+                        </h3>
+
+                    </div>
+
+                    <p>
+                        Adjust contribution and growth assumptions
+                        to simulate different retirement paths.
+                        The values shown inside the fields are
+                        examples only.
+                    </p>
+
+                </div>
+
+
+                <div class="dial-grid">
+
+
+                    <!-- EMPLOYEE EPF -->
+
+                    <div class="dial-card">
+
+                        <div class="dial-top">
+
+                            <span>
+                                EMPLOYEE EPF
+                            </span>
+
+                            <span>
+                                A
+                            </span>
+
+                        </div>
+
+                        <div class="dial-input">
+
+                            <input
+                                type="number"
+                                name="employee_rate"
+                                min="0"
+                                step="0.01"
+                                placeholder="12"
+                                required
+                            >
+
+                            <span>%</span>
+
+                        </div>
+
+                        <div class="dial-line">
+                            <span></span>
+                        </div>
+
+                        <p>
+                            Your regular EPF contribution
+                        </p>
+
+                    </div>
+
+
+                    <!-- EMPLOYER EPF -->
+
+                    <div class="dial-card">
+
+                        <div class="dial-top">
+
+                            <span>
+                                EMPLOYER EPF
+                            </span>
+
+                            <span>
+                                B
+                            </span>
+
+                        </div>
+
+                        <div class="dial-input">
+
+                            <input
+                                type="number"
+                                name="employer_rate"
+                                min="0"
+                                step="0.01"
+                                placeholder="12"
+                                required
+                            >
+
+                            <span>%</span>
+
+                        </div>
+
+                        <div class="dial-line">
+                            <span></span>
+                        </div>
+
+                        <p>
+                            Employer contribution assumption
+                        </p>
+
+                    </div>
+
+
+                    <!-- VPF -->
+
+                    <div class="dial-card lime-card">
+
+                        <div class="dial-top">
+
+                            <span>
+                                VPF BOOST
+                            </span>
+
+                            <span>
+                                C
+                            </span>
+
+                        </div>
+
+                        <div class="dial-input">
+
+                            <input
+                                type="number"
+                                name="vpf_rate"
+                                min="0"
+                                step="0.01"
+                                placeholder="5"
+                                required
+                            >
+
+                            <span>%</span>
+
+                        </div>
+
+                        <div class="dial-line">
+                            <span></span>
+                        </div>
+
+                        <p>
+                            Additional voluntary contribution
+                        </p>
+
+                    </div>
+
+
+                    <!-- SALARY GROWTH -->
+
+                    <div class="dial-card">
+
+                        <div class="dial-top">
+
+                            <span>
+                                SALARY TRAJECTORY
+                            </span>
+
+                            <span>
+                                D
+                            </span>
+
+                        </div>
+
+                        <div class="dial-input">
+
+                            <input
+                                type="number"
+                                name="salary_growth"
+                                min="0"
+                                step="0.01"
+                                placeholder="8"
+                                required
+                            >
+
+                            <span>%</span>
+
+                        </div>
+
+                        <div class="dial-line">
+                            <span></span>
+                        </div>
+
+                        <p>
+                            Expected annual salary growth
+                        </p>
+
+                    </div>
+
+
+                    <!-- INTEREST -->
+
+                    <div class="dial-card purple-card">
+
+                        <div class="dial-top">
+
+                            <span>
+                                EPF INTEREST
+                            </span>
+
+                            <span>
+                                E
+                            </span>
+
+                        </div>
+
+                        <div class="dial-input">
+
+                            <input
+                                type="number"
+                                name="interest_rate"
+                                min="0"
+                                step="0.01"
+                                placeholder="8.25"
+                                required
+                            >
+
+                            <span>%</span>
+
+                        </div>
+
+                        <div class="dial-line">
+                            <span></span>
+                        </div>
+
+                        <p>
+                            Interest-rate assumption
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- CTA -->
+
+            <button
+                class="simulation-button"
+                type="submit"
+            >
+
+                <div>
+
+                    <span>
+                        READY / RUN
+                    </span>
+
+                    <strong>
+                        RUN MY RETIREMENT SIMULATION
+                    </strong>
+
+                </div>
+
+                <span class="button-arrow">
+                    →
+                </span>
+
+            </button>
+
+        </form>
+
+    </section>
+
+
+    <!-- RESULTS -->
+
+    {% if results %}
+
+    <section class="results">
+
+        <div class="results-heading">
+
+            <span class="section-index">
+                02 / FUTURE
+            </span>
+
+            <h2>
+                Meet your
+                <span>future fund.</span>
+            </h2>
+
+        </div>
+
+
+        <!-- FUTURE FUND -->
+
+        <div class="future-fund">
+
+            <div class="future-fund-left">
+
+                <span class="future-fund-label">
+                    PROJECTED EPF AT AGE
+                    {{ results.retirement_age }}
+                </span>
+
+                <div class="giant-corpus">
+
+                    <span>₹</span>
+
+                    <strong>
+                        {{ results.projected_corpus|indian }}
+                    </strong>
+
+                </div>
+
+                <p>
+                    Based on a {{ results.years }}-year
+                    accumulation period and the assumptions
+                    entered above.
+                </p>
+
+            </div>
+
+
+            <div class="future-fund-right">
+
+                <div class="future-stat">
+
+                    <span>
+                        STARTING AGE
+                    </span>
+
+                    <strong>
+                        {{ results.current_age }}
+                    </strong>
+
+                </div>
+
+
+                <div class="future-stat">
+
+                    <span>
+                        RETIREMENT
+                    </span>
+
+                    <strong>
+                        {{ results.retirement_age }}
+                    </strong>
+
+                </div>
+
+
+                <div class="future-stat accent">
+
+                    <span>
+                        YEARS TO BUILD
+                    </span>
+
+                    <strong>
+                        {{ results.years }}
+                    </strong>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- MONEY STORY -->
+
+        <div class="money-story">
+
+            <div class="story-title">
+
+                <span class="panel-code">
+                    THE MONEY STORY / 03
+                </span>
+
+                <h3>
+                    Where does the corpus
+                    come from?
+                </h3>
+
+            </div>
+
+
+            <div class="story-grid">
+
+                <div class="story-card">
+
+                    <span class="story-number">
+                        01
+                    </span>
+
+                    <span class="story-label">
+                        YOU PUT IN
+                    </span>
+
+                    <strong>
+                        ₹{{ results.employee_contribution|indian }}
+                    </strong>
+
+                    <p>
+                        Regular employee EPF
+                    </p>
+
+                </div>
+
+
+                <div class="story-card">
+
+                    <span class="story-number">
+                        02
+                    </span>
+
+                    <span class="story-label">
+                        EMPLOYER ADDS
+                    </span>
+
+                    <strong>
+                        ₹{{ results.employer_epf_contribution|indian }}
+                    </strong>
+
+                    <p>
+                        Employer amount modeled into EPF
+                    </p>
+
+                </div>
+
+
+                <div class="story-card lime-story">
+
+                    <span class="story-number">
+                        03
+                    </span>
+
+                    <span class="story-label">
+                        VPF ADDS
+                    </span>
+
+                    <strong>
+                        ₹{{ results.vpf_contribution|indian }}
+                    </strong>
+
+                    <p>
+                        Your voluntary contribution
+                    </p>
+
+                </div>
+
+
+                <div class="story-card purple-story">
+
+                    <span class="story-number">
+                        04
+                    </span>
+
+                    <span class="story-label">
+                        COMPOUNDING CREATES
+                    </span>
+
+                    <strong>
+                        ₹{{ results.interest_earned|indian }}
+                    </strong>
+
+                    <p>
+                        Estimated interest generated
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- FLIGHT PATH -->
+
+        <div class="flight-panel">
+
+            <div class="flight-header">
+
+                <div>
+
+                    <span class="panel-code">
+                        RETIREMENT FLIGHT PATH / 04
+                    </span>
+
+                    <h3>
+                        Watch your fund
+                        travel through time.
+                    </h3>
+
+                </div>
+
+
+                <div class="flight-meta">
+
+                    <span>NOW</span>
+
+                    <strong>
+                        AGE {{ results.current_age }}
+                    </strong>
+
+                    <i></i>
+
+                    <span>
+                        DESTINATION
+                    </span>
+
+                    <strong>
+                        AGE {{ results.retirement_age }}
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+            <div class="chart-container">
+                <canvas id="growthChart"></canvas>
+            </div>
+
+        </div>
+
+
+        <!-- VPF LAB -->
+
+        <div class="vpf-lab">
+
+            <div class="vpf-copy">
+
+                <span class="lab-code">
+                    EXPERIMENT / VPF
+                </span>
+
+                <h3>
+                    The VPF
+                    <span>effect.</span>
+                </h3>
+
+                <p>
+                    See how your voluntary contribution
+                    changes the estimated retirement
+                    destination.
+                </p>
+
+            </div>
+
+
+            <div class="vpf-machine">
+
+                <div class="vpf-side">
+
+                    <span>
+                        WITHOUT VPF
+                    </span>
+
+                    <strong>
+                        ₹{{ results.without_vpf|indian }}
+                    </strong>
+
+                </div>
+
+
+                <div class="vpf-arrow">
+
+                    <span>
+                        +{{ results.vpf_rate }}%
+                    </span>
+
+                    <div>
+                        →
+                    </div>
+
+                </div>
+
+
+                <div class="vpf-side">
+
+                    <span>
+                        WITH VPF
+                    </span>
+
+                    <strong>
+                        ₹{{ results.with_vpf|indian }}
+                    </strong>
+
+                </div>
+
+
+                <div class="vpf-gain">
+
+                    <span>
+                        ADDITIONAL PROJECTED CORPUS
+                    </span>
+
+                    <strong>
+                        +₹{{ results.additional_vpf_corpus|indian }}
+                    </strong>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- COMPOSITION -->
+
+        <div class="composition-panel">
+
+            <div class="composition-heading">
+
+                <span class="panel-code">
+                    CORPUS DNA / 05
+                </span>
+
+                <h3>
+                    Contribution
+                    vs compounding.
+                </h3>
+
+            </div>
+
+
+            <div class="composition-data">
+
+                <div class="composition-item">
+
+                    <div class="composition-label">
+
+                        <span>
+                            CONTRIBUTIONS
+                        </span>
+
+                        <strong>
+                            ₹{{ results.total_contributions|indian }}
+                        </strong>
+
+                    </div>
+
+                    <div class="composition-track">
+
+                        <div
+                            class="dynamic-bar contribution-bar"
+                            data-value="{{ results.total_contributions }}"
+                            data-total="{{ results.projected_corpus }}"
+                        ></div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="composition-item">
+
+                    <div class="composition-label">
+
+                        <span>
+                            INTEREST EARNED
+                        </span>
+
+                        <strong>
+                            ₹{{ results.interest_earned|indian }}
+                        </strong>
+
+                    </div>
+
+                    <div class="composition-track">
+
+                        <div
+                            class="dynamic-bar interest-bar"
+                            data-value="{{ results.interest_earned }}"
+                            data-total="{{ results.projected_corpus }}"
+                        ></div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- FINAL METRICS -->
+
+        <div class="metric-grid">
+
+            <div class="metric">
+
+                <span>
+                    EPS CONTRIBUTION
+                </span>
+
+                <strong>
+                    ₹{{ results.eps_contribution|indian }}
+                </strong>
+
+                <p>
+                    Cumulative employer-side amount
+                    modeled toward EPS.
+                </p>
+
+            </div>
+
+
+            <div class="metric">
+
+                <span>
+                    FINAL BASIC + DA
+                </span>
+
+                <strong>
+                    ₹{{ results.final_salary|indian }}
+                </strong>
+
+                <p>
+                    Estimated monthly Basic + DA
+                    near retirement.
+                </p>
+
+            </div>
+
+
+            <div class="metric">
+
+                <span>
+                    FINAL MONTHLY EPF
+                </span>
+
+                <strong>
+                    ₹{{ results.final_employee_monthly|indian }}
+                </strong>
+
+                <p>
+                    Projected monthly employee EPF
+                    contribution near retirement.
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <!-- DISCLAIMER -->
+
+        <div class="disclaimer">
+
+            <span>
+                MODEL NOTE
+            </span>
+
+            <p>
+                This calculator provides an illustrative
+                EPF projection based on the assumptions
+                entered by the user. Actual EPF, EPS,
+                interest crediting, contribution eligibility
+                and retirement benefits may differ depending
+                on applicable EPFO rules, employment history
+                and future regulatory changes.
+            </p>
+
+        </div>
+
+    </section>
+
+    {% endif %}
+
+
+    <!-- FOOTER -->
+
+    <footer>
+
+        <span>
+            AAFM INDIA
+        </span>
+
+        <span>
+            FUTURE FUND / EPF SIMULATOR
+        </span>
+
+        <span>
+            EDUCATIONAL MODEL
+        </span>
+
+    </footer>
+
+</div>
+
+
+<!-- RESULTS DATA -->
+
+{% if results %}
+
+<script
+    id="yearly-data"
+    type="application/json"
+>
+    {{ results.yearly_data | tojson }}
+</script>
+
+
+<script>
+
+    const yearlyData = JSON.parse(
+        document.getElementById("yearly-data").textContent
+    );
+
+
+    const ages = yearlyData.map(
+        item => item.age
+    );
+
+
+    const balances = yearlyData.map(
+        item => item.closing_balance
+    );
+
+
+    const chartCanvas = document.getElementById(
+        "growthChart"
+    );
+
+
+    if (chartCanvas) {
+
+        const context = chartCanvas.getContext(
+            "2d"
+        );
+
+
+        const gradient = context.createLinearGradient(
+            0,
+            0,
+            0,
+            420
+        );
+
+
+        gradient.addColorStop(
+            0,
+            "rgba(197, 255, 91, 0.30)"
+        );
+
+
+        gradient.addColorStop(
+            1,
+            "rgba(197, 255, 91, 0)"
+        );
+
+
+        new Chart(
+
+            chartCanvas,
+
+            {
+
+                type: "line",
+
+                data: {
+
+                    labels: ages,
+
+                    datasets: [{
+
+                        data: balances,
+
+                        borderColor:
+                            "#c5ff5b",
+
+                        backgroundColor:
+                            gradient,
+
+                        borderWidth:
+                            3,
+
+                        pointRadius:
+                            0,
+
+                        pointHoverRadius:
+                            6,
+
+                        pointHoverBackgroundColor:
+                            "#c5ff5b",
+
+                        fill:
+                            true,
+
+                        tension:
+                            0.38
+
+                    }]
+
+                },
+
+
+                options: {
+
+                    responsive:
+                        true,
+
+                    maintainAspectRatio:
+                        false,
+
+
+                    interaction: {
+
+                        intersect:
+                            false,
+
+                        mode:
+                            "index"
+
+                    },
+
+
+                    plugins: {
+
+                        legend: {
+                            display: false
+                        },
+
+
+                        tooltip: {
+
+                            backgroundColor:
+                                "#171922",
+
+                            titleColor:
+                                "#c5ff5b",
+
+                            bodyColor:
+                                "#ffffff",
+
+                            padding:
+                                14,
+
+                            displayColors:
+                                false,
+
+
+                            callbacks: {
+
+                                title:
+                                    function(items) {
+
+                                        return (
+                                            "AGE "
+                                            +
+                                            items[0].label
+                                        );
+
+                                    },
+
+
+                                label:
+                                    function(context) {
+
+                                        return (
+                                            "Corpus  ₹"
+                                            +
+                                            Math.round(
+                                                context.raw
+                                            ).toLocaleString(
+                                                "en-IN"
+                                            )
+                                        );
+
+                                    }
+
+                            }
+
+                        }
+
+                    },
+
+
+                    scales: {
+
+                        x: {
+
+                            border: {
+                                display: false
+                            },
+
+                            grid: {
+                                display: false
+                            },
+
+                            ticks: {
+
+                                color:
+                                    "#737886",
+
+                                font: {
+                                    size: 10
+                                }
+
+                            }
+
+                        },
+
+
+                        y: {
+
+                            border: {
+                                display: false
+                            },
+
+                            grid: {
+
+                                color:
+                                    "rgba(255,255,255,0.06)"
+
+                            },
+
+                            ticks: {
+
+                                color:
+                                    "#737886",
+
+                                font: {
+                                    size: 10
+                                },
+
+                                callback:
+                                    function(value) {
+
+                                        if (
+                                            value >= 10000000
+                                        ) {
+
+                                            return (
+                                                "₹"
+                                                +
+                                                (
+                                                    value
+                                                    /
+                                                    10000000
+                                                ).toFixed(1)
+                                                +
+                                                "Cr"
+                                            );
+
+                                        }
+
+
+                                        if (
+                                            value >= 100000
+                                        ) {
+
+                                            return (
+                                                "₹"
+                                                +
+                                                (
+                                                    value
+                                                    /
+                                                    100000
+                                                ).toFixed(1)
+                                                +
+                                                "L"
+                                            );
+
+                                        }
+
+
+                                        return (
+                                            "₹"
+                                            +
+                                            value
+                                        );
+
+                                    }
+
+                            }
+
+                        }
+
+                    }
+
+                }
+
+            }
+
+        );
+
+    }
+
+
+    document
+        .querySelectorAll(
+            ".dynamic-bar"
+        )
+        .forEach(
+            function(bar) {
+
+                const value = Number(
+                    bar.dataset.value
+                );
+
+                const total = Number(
+                    bar.dataset.total
+                );
+
+
+                if (
+                    total > 0
+                    &&
+                    !Number.isNaN(value)
+                ) {
+
+                    const percentage =
+                        Math.min(
+                            100,
+                            Math.max(
+                                0,
+                                (
+                                    value
+                                    /
+                                    total
+                                )
+                                *
+                                100
+                            )
+                        );
+
+
+                    bar.style.width =
+                        percentage
+                        +
+                        "%";
+
+                }
+
+            }
+        );
+
+</script>
+
+{% endif %}
+
+</body>
+</html>
