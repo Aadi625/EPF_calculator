@@ -4,20 +4,14 @@ app = Flask(__name__)
 
 
 # =========================================================
-# CONFIGURATION
-# =========================================================
-
-EPS_RATE = 8.33 / 100
-EPS_WAGE_CEILING = 15000
-
-
-# =========================================================
-# HELPERS
+# INDIAN NUMBER FORMAT
 # =========================================================
 
 def indian_format(value):
+
     try:
         value = round(float(value))
+
     except (ValueError, TypeError):
         return "0"
 
@@ -27,28 +21,49 @@ def indian_format(value):
     number = str(value)
 
     if len(number) <= 3:
+
         formatted = number
 
     else:
+
         last_three = number[-3:]
         remaining = number[:-3]
 
         pairs = []
 
         while len(remaining) > 2:
-            pairs.insert(0, remaining[-2:])
+
+            pairs.insert(
+                0,
+                remaining[-2:]
+            )
+
             remaining = remaining[:-2]
 
         if remaining:
-            pairs.insert(0, remaining)
 
-        formatted = ",".join(pairs) + "," + last_three
+            pairs.insert(
+                0,
+                remaining
+            )
 
-    return ("-" if negative else "") + formatted
+        formatted = (
+            ",".join(pairs)
+            + ","
+            + last_three
+        )
+
+    return (
+        "-" if negative else ""
+    ) + formatted
 
 
 app.jinja_env.filters["indian"] = indian_format
 
+
+# =========================================================
+# EPF PROJECTION ENGINE
+# =========================================================
 
 def calculate_epf_projection(
     current_age,
@@ -62,183 +77,239 @@ def calculate_epf_projection(
     interest_rate
 ):
 
-    years = retirement_age - current_age + 1
+    # -----------------------------------------------------
+    # IMPORTANT
+    #
+    # Inclusive calculation:
+    #
+    # Age 25 to Age 60
+    # = 60 - 25 + 1
+    # = 36 contribution years
+    # -----------------------------------------------------
+
+    years = (
+        retirement_age
+        - current_age
+        + 1
+    )
+
 
     balance = current_balance
+
     salary = monthly_salary
 
+
     total_employee = 0
+
     total_employer_epf = 0
-    total_eps = 0
+
     total_vpf = 0
+
     total_interest = 0
+
 
     yearly_data = []
 
-    # -----------------------------------------
-    # Projection WITH VPF
-    # -----------------------------------------
+
+    # =====================================================
+    # PROJECTION WITH VPF
+    # =====================================================
 
     for year in range(years):
 
         opening_balance = balance
 
-        yearly_employee = 0
-        yearly_employer = 0
-        yearly_eps = 0
-        yearly_vpf = 0
-        yearly_interest = 0
 
-        for month in range(12):
+        # -------------------------------------------------
+        # ANNUAL EMPLOYEE EPF
+        # -------------------------------------------------
 
-            employee_contribution = (
-                salary * employee_rate
-            )
+        annual_employee = (
+            salary
+            * 12
+            * employee_rate
+        )
 
-            employer_total = (
-                salary * employer_rate
-            )
 
-            # EPS is modeled at 8.33%
-            # subject to pension wage ceiling.
+        # -------------------------------------------------
+        # ANNUAL EMPLOYER EPF
+        #
+        # IMPORTANT:
+        #
+        # The employer_rate entered by the user is treated
+        # as the amount ENTERING EPF directly.
+        #
+        # Example:
+        # 3.67% means 3.67% goes into EPF.
+        #
+        # We DO NOT subtract EPS again.
+        # -------------------------------------------------
 
-            pensionable_salary = min(
-                salary,
-                EPS_WAGE_CEILING
-            )
+        annual_employer_epf = (
+            salary
+            * 12
+            * employer_rate
+        )
 
-            eps_contribution = (
-                pensionable_salary
-                * EPS_RATE
-            )
 
-            # EPS cannot exceed modeled
-            # employer contribution.
+        # -------------------------------------------------
+        # ANNUAL VPF
+        # -------------------------------------------------
 
-            eps_contribution = min(
-                eps_contribution,
-                employer_total
-            )
+        annual_vpf = (
+            salary
+            * 12
+            * vpf_rate
+        )
 
-            employer_epf = (
-                employer_total
-                - eps_contribution
-            )
 
-            vpf_contribution = (
-                salary * vpf_rate
-            )
+        # -------------------------------------------------
+        # TOTAL CONTRIBUTION FOR THE YEAR
+        # -------------------------------------------------
 
-            monthly_contribution = (
-                employee_contribution
-                + employer_epf
-                + vpf_contribution
-            )
+        annual_contribution = (
+            annual_employee
+            + annual_employer_epf
+            + annual_vpf
+        )
 
-            # Monthly approximation of
-            # annual EPF interest rate.
 
-            monthly_interest = (
-                balance
-                * (interest_rate / 12)
-            )
+        # -------------------------------------------------
+        # ADD CONTRIBUTION
+        # -------------------------------------------------
 
-            balance += (
-                monthly_interest
-                + monthly_contribution
-            )
+        balance += annual_contribution
 
-            yearly_employee += (
-                employee_contribution
-            )
 
-            yearly_employer += (
-                employer_epf
-            )
+        # -------------------------------------------------
+        # ANNUAL EPF INTEREST
+        # -------------------------------------------------
 
-            yearly_eps += (
-                eps_contribution
-            )
+        annual_interest = (
+            balance
+            * interest_rate
+        )
 
-            yearly_vpf += (
-                vpf_contribution
-            )
 
-            yearly_interest += (
-                monthly_interest
-            )
+        balance += annual_interest
 
-        total_employee += yearly_employee
-        total_employer_epf += yearly_employer
-        total_eps += yearly_eps
-        total_vpf += yearly_vpf
-        total_interest += yearly_interest
+
+        # -------------------------------------------------
+        # ACCUMULATE TOTALS
+        # -------------------------------------------------
+
+        total_employee += (
+            annual_employee
+        )
+
+        total_employer_epf += (
+            annual_employer_epf
+        )
+
+        total_vpf += (
+            annual_vpf
+        )
+
+        total_interest += (
+            annual_interest
+        )
+
+
+        # -------------------------------------------------
+        # SAVE YEARLY DATA FOR CHART
+        # -------------------------------------------------
 
         yearly_data.append({
-            "age": current_age + year + 1,
-            "salary": round(salary),
-            "opening_balance": round(opening_balance),
-            "employee": round(yearly_employee),
-            "employer": round(yearly_employer),
-            "vpf": round(yearly_vpf),
-            "interest": round(yearly_interest),
-            "closing_balance": round(balance)
+
+            "age":
+                current_age + year,
+
+            "salary":
+                round(salary),
+
+            "opening_balance":
+                round(opening_balance),
+
+            "employee":
+                round(annual_employee),
+
+            "employer":
+                round(annual_employer_epf),
+
+            "vpf":
+                round(annual_vpf),
+
+            "interest":
+                round(annual_interest),
+
+            "closing_balance":
+                round(balance)
+
         })
 
-        salary *= (1 + salary_growth)
+
+        # -------------------------------------------------
+        # SALARY INCREASE FOR NEXT YEAR
+        # -------------------------------------------------
+
+        salary *= (
+            1 + salary_growth
+        )
 
 
     # =====================================================
-    # SECOND PROJECTION — WITHOUT VPF
+    # PROJECTION WITHOUT VPF
     # =====================================================
 
     no_vpf_balance = current_balance
+
     no_vpf_salary = monthly_salary
+
 
     for year in range(years):
 
-        for month in range(12):
 
-            employee_contribution = (
-                no_vpf_salary
-                * employee_rate
-            )
+        annual_employee = (
+            no_vpf_salary
+            * 12
+            * employee_rate
+        )
 
-            employer_total = (
-                no_vpf_salary
-                * employer_rate
-            )
 
-            pensionable_salary = min(
-                no_vpf_salary,
-                EPS_WAGE_CEILING
-            )
+        annual_employer_epf = (
+            no_vpf_salary
+            * 12
+            * employer_rate
+        )
 
-            eps_contribution = (
-                pensionable_salary
-                * EPS_RATE
-            )
 
-            eps_contribution = min(
-                eps_contribution,
-                employer_total
-            )
+        annual_contribution = (
+            annual_employee
+            + annual_employer_epf
+        )
 
-            employer_epf = (
-                employer_total
-                - eps_contribution
-            )
 
-            monthly_interest = (
-                no_vpf_balance
-                * (interest_rate / 12)
-            )
+        # Add annual contribution
 
-            no_vpf_balance += (
-                monthly_interest
-                + employee_contribution
-                + employer_epf
-            )
+        no_vpf_balance += (
+            annual_contribution
+        )
+
+
+        # Apply annual interest
+
+        no_vpf_interest = (
+            no_vpf_balance
+            * interest_rate
+        )
+
+
+        no_vpf_balance += (
+            no_vpf_interest
+        )
+
+
+        # Salary increase
 
         no_vpf_salary *= (
             1 + salary_growth
@@ -246,21 +317,47 @@ def calculate_epf_projection(
 
 
     # =====================================================
-    # FINAL VALUES
+    # FINAL SALARY
     # =====================================================
 
-    final_monthly_salary = salary / (
-        1 + salary_growth
-    )
+    if years > 0:
+
+        final_monthly_salary = (
+            salary
+            /
+            (1 + salary_growth)
+        )
+
+    else:
+
+        final_monthly_salary = (
+            monthly_salary
+        )
+
+
+    # =====================================================
+    # FINAL MONTHLY EMPLOYEE EPF
+    # =====================================================
 
     final_employee_contribution = (
         final_monthly_salary
         * employee_rate
     )
 
+
+    # =====================================================
+    # VPF IMPACT
+    # =====================================================
+
     additional_vpf_corpus = (
-        balance - no_vpf_balance
+        balance
+        - no_vpf_balance
     )
+
+
+    # =====================================================
+    # TOTAL CONTRIBUTIONS INTO EPF
+    # =====================================================
 
     total_contributions_to_epf = (
         total_employee
@@ -268,9 +365,30 @@ def calculate_epf_projection(
         + total_vpf
     )
 
+
+    # =====================================================
+    # EPS
+    #
+    # Employer contribution input is already the EPF
+    # component (for example 3.67%).
+    #
+    # Therefore EPS is NOT deducted from this amount.
+    #
+    # We return 0 because EPS is not part of the projected
+    # EPF corpus under this calculation model.
+    # =====================================================
+
+    total_eps = 0
+
+
+    # =====================================================
+    # RETURN RESULTS
+    # =====================================================
+
     return {
 
-        "years": years,
+        "years":
+            years,
 
         "projected_corpus":
             round(balance),
@@ -294,7 +412,9 @@ def calculate_epf_projection(
             round(final_monthly_salary),
 
         "final_employee_monthly":
-            round(final_employee_contribution),
+            round(
+                final_employee_contribution
+            ),
 
         "without_vpf":
             round(no_vpf_balance),
@@ -303,162 +423,251 @@ def calculate_epf_projection(
             round(balance),
 
         "additional_vpf_corpus":
-            round(additional_vpf_corpus),
+            round(
+                additional_vpf_corpus
+            ),
 
         "total_contributions":
-            round(total_contributions_to_epf),
+            round(
+                total_contributions_to_epf
+            ),
 
         "yearly_data":
             yearly_data
+
     }
 
 
 # =========================================================
-# ROUTE
+# MAIN ROUTE
 # =========================================================
 
-@app.route("/", methods=["GET", "POST"])
+@app.route(
+    "/",
+    methods=[
+        "GET",
+        "POST"
+    ]
+)
+
 def index():
 
     results = None
+
     error = None
+
 
     if request.method == "POST":
 
         try:
 
+            # =================================================
+            # REQUIRED INPUTS
+            # =================================================
+
             current_age = int(
                 request.form.get(
-                    "current_age",
-                    0
+                    "current_age"
                 )
             )
+
 
             retirement_age = int(
                 request.form.get(
-                    "retirement_age",
-                    0
+                    "retirement_age"
                 )
             )
 
+
             monthly_salary = float(
                 request.form.get(
-                    "monthly_salary",
-                    0
-                ) or 0
+                    "monthly_salary"
+                )
             )
 
-            current_balance = float(
-                request.form.get(
-                    "current_balance",
-                    0
-                ) or 0
+
+            employee_rate = (
+                float(
+                    request.form.get(
+                        "employee_rate"
+                    )
+                )
+                / 100
             )
 
-            employee_rate = float(
+
+            employer_rate = (
+                float(
+                    request.form.get(
+                        "employer_rate"
+                    )
+                )
+                / 100
+            )
+
+
+            vpf_rate = (
+                float(
+                    request.form.get(
+                        "vpf_rate"
+                    )
+                )
+                / 100
+            )
+
+
+            salary_growth = (
+                float(
+                    request.form.get(
+                        "salary_growth"
+                    )
+                )
+                / 100
+            )
+
+
+            interest_rate = (
+                float(
+                    request.form.get(
+                        "interest_rate"
+                    )
+                )
+                / 100
+            )
+
+
+            # =================================================
+            # CURRENT EPF BALANCE
+            # =================================================
+
+            current_balance_raw = (
                 request.form.get(
-                    "employee_rate",
-                    12
-                ) or 12
-            ) / 100
-
-            employer_rate = float(
-                request.form.get(
-                    "employer_rate",
-                    12
-                ) or 12
-            ) / 100
-
-            salary_growth = float(
-                request.form.get(
-                    "salary_growth",
-                    8
-                ) or 0
-            ) / 100
-
-            vpf_rate = float(
-                request.form.get(
-                    "vpf_rate",
-                    0
-                ) or 0
-            ) / 100
-
-            interest_rate = float(
-                request.form.get(
-                    "interest_rate",
-                    8.25
-                ) or 0
-            ) / 100
+                    "current_balance"
+                )
+            )
 
 
-            # -----------------------------------------
+            if (
+                current_balance_raw is None
+                or
+                current_balance_raw.strip() == ""
+            ):
+
+                current_balance = 0
+
+            else:
+
+                current_balance = float(
+                    current_balance_raw
+                )
+
+
+            # =================================================
             # VALIDATION
-            # -----------------------------------------
+            # =================================================
 
             if current_age < 18:
+
                 raise ValueError(
                     "Current age must be at least 18."
                 )
 
+
             if retirement_age <= current_age:
+
                 raise ValueError(
                     "Retirement age must be greater than current age."
                 )
 
+
+            if retirement_age > 100:
+
+                raise ValueError(
+                    "Please enter a valid retirement age."
+                )
+
+
             if monthly_salary <= 0:
+
                 raise ValueError(
                     "Monthly Basic Salary + DA must be greater than zero."
                 )
 
+
             if current_balance < 0:
+
                 raise ValueError(
                     "Current EPF balance cannot be negative."
                 )
 
+
             if employee_rate < 0:
+
                 raise ValueError(
-                    "Employee contribution cannot be negative."
+                    "Employee EPF contribution cannot be negative."
                 )
+
 
             if employer_rate < 0:
+
                 raise ValueError(
-                    "Employer contribution cannot be negative."
+                    "Employer EPF contribution cannot be negative."
                 )
 
-            if salary_growth < 0:
-                raise ValueError(
-                    "Salary growth cannot be negative."
-                )
 
             if vpf_rate < 0:
+
                 raise ValueError(
                     "VPF contribution cannot be negative."
                 )
 
-            if interest_rate < 0:
+
+            if salary_growth < 0:
+
                 raise ValueError(
-                    "Interest rate cannot be negative."
+                    "Salary growth cannot be negative."
                 )
 
 
-            # -----------------------------------------
-            # CALCULATE
-            # -----------------------------------------
+            if interest_rate < 0:
 
-            projection = calculate_epf_projection(
+                raise ValueError(
+                    "EPF interest rate cannot be negative."
+                )
 
-                current_age,
-                retirement_age,
-                monthly_salary,
-                current_balance,
-                employee_rate,
-                employer_rate,
-                salary_growth,
-                vpf_rate,
-                interest_rate
 
+            # =================================================
+            # RUN CALCULATION
+            # =================================================
+
+            projection = (
+                calculate_epf_projection(
+
+                    current_age,
+
+                    retirement_age,
+
+                    monthly_salary,
+
+                    current_balance,
+
+                    employee_rate,
+
+                    employer_rate,
+
+                    salary_growth,
+
+                    vpf_rate,
+
+                    interest_rate
+
+                )
             )
 
+
+            # =================================================
+            # RESULT DATA
+            # =================================================
 
             results = {
 
@@ -477,42 +686,93 @@ def index():
                     current_balance,
 
                 "employee_rate":
-                    employee_rate * 100,
+                    round(
+                        employee_rate * 100,
+                        2
+                    ),
 
                 "employer_rate":
-                    employer_rate * 100,
+                    round(
+                        employer_rate * 100,
+                        2
+                    ),
 
                 "salary_growth":
-                    salary_growth * 100,
+                    round(
+                        salary_growth * 100,
+                        2
+                    ),
 
                 "vpf_rate":
-                    vpf_rate * 100,
+                    round(
+                        vpf_rate * 100,
+                        2
+                    ),
 
                 "interest_rate":
-                    interest_rate * 100
+                    round(
+                        interest_rate * 100,
+                        2
+                    )
+
             }
 
 
-        except ValueError as e:
-            error = str(e)
+        except (
+            TypeError,
+            ValueError
+        ) as e:
+
+            message = str(e)
+
+
+            if (
+                "invalid literal"
+                in message
+                or
+                "float()"
+                in message
+                or
+                "int()"
+                in message
+            ):
+
+                error = (
+                    "Please complete all required fields "
+                    "before running the simulation."
+                )
+
+            else:
+
+                error = message
+
 
         except Exception:
+
             error = (
                 "Something went wrong while calculating "
-                "your EPF projection."
+                "your EPF projection. Please check your "
+                "inputs and try again."
             )
 
 
     return render_template(
+
         "index.html",
+
         results=results,
+
         error=error
+
     )
 
 
 # =========================================================
-# RUN
+# RUN APPLICATION
 # =========================================================
 
 if __name__ == "__main__":
-    app.run(debug=True)
+
+    app.run(
+        debug=True
+    )
